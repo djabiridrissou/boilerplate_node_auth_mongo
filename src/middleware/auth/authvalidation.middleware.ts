@@ -4,7 +4,9 @@ import Validator from 'validatorjs';
 const validationMiddleware = (validationRules: any) => {
     return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const validation = new Validator(req.body, validationRules);
+            const { userDto } = req.body;
+
+            const validation = new Validator(userDto, validationRules);
 
             validation.passes(() => {
                 next();
@@ -12,10 +14,12 @@ const validationMiddleware = (validationRules: any) => {
 
             validation.fails(() => {
                 const errors = validation.errors.all();
+                const firstErrorKey = Object.keys(errors)[0];
+                const firstErrorMessage = errors[firstErrorKey][0];
                 res.status(412).send({
                     success: false,
-                    message: 'Validation failed',
-                    data: errors
+                    message: firstErrorMessage,
+                    data: errors 
                 });
             });
         } catch (err) {
@@ -24,18 +28,24 @@ const validationMiddleware = (validationRules: any) => {
     };
 };
 
+
 const registerValidation = validationMiddleware({
     fullName: "required|string|min:3",
-    email: "required|email",
+    identifier: "required",
     password: "required|min:6"
 });
 
 const loginValidation = validationMiddleware({
-    email: "required|email",
+    identifier: "required",
     password: "required|min:6",
 });
 
+const updateUserValidation = validationMiddleware({
+    password: "required|min:6"
+})
+
 export {
     registerValidation,
-    loginValidation
+    loginValidation,
+    updateUserValidation
 };

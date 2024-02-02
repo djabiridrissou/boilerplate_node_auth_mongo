@@ -17,7 +17,7 @@ export default (req: Request, res: Response, next: NextFunction): any => {
         next();
     } catch (err) {
         return res.status(401).json({
-            message: "Authentification Failed"
+            message: "Log in to continue"
         });
     }
 };
